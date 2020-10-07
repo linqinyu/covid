@@ -2165,7 +2165,7 @@ function GetDataValues(inputDate) {
         vals.push(Math.round(testingPosData[json][inputDate][id]*1000)/10);
     }
     return vals;
-  } else if (txt == "7 Day Positivity Rate %") {
+  } else if (txt == "7 Day Testing Positivity Rate %") {
     var vals = [];
     for (var id in caseData[json][inputDate]) {
       if (testingWkPosData[json][inputDate][id] == '' || testingWkPosData[json][inputDate][id] == 0)
