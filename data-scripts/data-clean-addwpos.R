@@ -5,15 +5,10 @@ library(sf)
 library(tidyverse)
 library(dplyr)
 
+
 #1p3aState
-<<<<<<< Updated upstream
 state_testing_count <- read.csv("~/Documents/covid-atlas-research/Testing_Data/python/state_testing.csv")
 for (i in 3:259) {#update this number every day
-=======
-state_testing_count <- read.csv("~/Documents/GitHub/covid-atlas-research/Testing_Data/python/state_testing.csv")
-nc <- ncol(state_testing_count)
-for (i in 3:nc) {
->>>>>>> Stashed changes
    names(state_testing_count)[i] <- 
       paste("t", substr(names(state_testing_count)[i], 2, 5), "-",
             substr(names(state_testing_count)[i], 6, 7), "-",
@@ -277,6 +272,28 @@ st_write(county_1p3a, "~/Documents/qlcovid/docs/counties_update.geojson")
 #county_usafacts <- left_join(county_usafacts, county_criteria, by = c("state_abbr"="State"))
 #write.csv(county_usafacts, "county_usafacts.csv")
 
+## define a function to change date format
+change_date <- function(den){
+   if (nchar(den) == 7) {
+      if (substr(den,2,2) == "/") {
+         den <- paste("2020-0",substr(den, 1, 1),"-",
+                      substr(den, 3, 4), sep = "")
+      }else{
+         den <- paste("2020-",substr(den, 1, 2),"-0",
+                      substr(den, 4, 4), sep = "")
+      }
+   }
+   if (nchar(den) == 6) {
+      den <- paste("2020-0",substr(den, 1, 1),"-0",
+                   substr(den, 3, 3), sep = "")
+   }
+   if (nchar(den) == 8) {
+      den <- paste("2020-",substr(den, 1, 2),"-",
+                   substr(den, 4, 5), sep = "")
+   }
+   return(den)
+}
+
 # read in usafacts case data
 covid_confirmed_usafacts <- read_csv("~/Documents/qlcovid/docs/covid_confirmed_usafacts.csv")
 
@@ -303,24 +320,8 @@ names(covid_usafacts)[261]
 for (i in 1:247){ #Update Daily
    den <- names(covid_usafacts)[15+i-1]
    new_case <- covid_usafacts[,15+i-1]-covid_usafacts[,15+i-2]
-   # caution - this relies on the order of the column - the confirmed cases must be in the right ordr 
-   if (nchar(den) == 7) {
-      if (substr(den,2,2) == "/") {
-         den <- paste("2020-0",substr(den, 1, 1),"-",
-                      substr(den, 3, 4), sep = "")
-      }else{
-         den <- paste("2020-",substr(den, 1, 2),"-0",
-                      substr(den, 4, 4), sep = "")
-      }
-   }
-   if (nchar(den) == 6) {
-      den <- paste("2020-0",substr(den, 1, 1),"-0",
-                   substr(den, 3, 3), sep = "")
-   }
-   if (nchar(den) == 8) {
-      den <- paste("2020-",substr(den, 1, 2),"-",
-                   substr(den, 4, 5), sep = "")
-   }
+   den <- change_date(den)
+   # caution - this relies on the order of the column - the confirmed cases must be in the right order
    for (j in 1:3142){
       if (is.na(covid_usafacts[j,paste("t",den, sep = "")])) {
          covid_usafacts[j,paste("t",den, sep = "")]==-1
@@ -343,28 +344,6 @@ for (i in 1:247){ #Update Daily
    }
    print(i)
    names(covid_usafacts)[518+i] <- paste("tpos",den, sep = "")
-}
-
-## define a function to change date format
-change_date <- function(den){
-if (nchar(den) == 7) {
-   if (substr(den,2,2) == "/") {
-      den <- paste("2020-0",substr(den, 1, 1),"-",
-                   substr(den, 3, 4), sep = "")
-   }else{
-      den <- paste("2020-",substr(den, 1, 2),"-0",
-                   substr(den, 4, 4), sep = "")
-   }
-}
-if (nchar(den) == 6) {
-   den <- paste("2020-0",substr(den, 1, 1),"-0",
-                substr(den, 3, 3), sep = "")
-}
-if (nchar(den) == 8) {
-   den <- paste("2020-",substr(den, 1, 2),"-",
-                substr(den, 4, 5), sep = "")
-}
-   return(den)
 }
 
 
