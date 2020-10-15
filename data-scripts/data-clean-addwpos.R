@@ -1,123 +1,14 @@
 #run 1p3a.py, save county geojson as csv file in /docs
 
-setwd("~/Documents/qlcovid/docs")
+setwd("C:/Users/Shadow/Documents/GitHub/covid/docs")
 library(sf)
 library(tidyverse)
 library(dplyr)
 
-
-#1p3aState
-state_testing_count <- read.csv("~/Documents/covid-atlas-research/Testing_Data/python/state_testing.csv")
-for (i in 3:259) {#update this number every day
-   names(state_testing_count)[i] <- 
-      paste("t", substr(names(state_testing_count)[i], 2, 5), "-",
-            substr(names(state_testing_count)[i], 6, 7), "-",
-            substr(names(state_testing_count)[i], 8, 9), sep = "")
-}
-
-state_testing_count[,3:259][is.na(state_testing_count[,3:259])] <- -1  #update this number every day
-
-# Read in states_update_processing.geojson
-states_update <- as.data.frame(st_read("~/Documents/qlcovid/docs/states_update_processing.geojson"))
-for (i in 17:254) {#update this number every day
-   names(states_update)[i] <- 
-      paste(substr(names(states_update)[i], 2, 5), "-",
-            substr(names(states_update)[i], 7, 8), "-",
-            substr(names(states_update)[i], 10, 11), sep = "")
-}
-
-for (i in 255:492) {#update this number every day 254-17+255
-   names(states_update)[i] <- 
-      paste("d", substr(names(states_update)[i], 2, 5), "-",
-            substr(names(states_update)[i], 7, 8), "-",
-            substr(names(states_update)[i], 10, 11), sep = "")
-}
-
-state_testing_count$"t2020-01-21" <- -1
-state_testing_count$"t2020-01-24" <- -1
-state_testing_count$"t2020-01-26" <- -1
-state_testing_count$"t2020-01-30" <- -1
-state_testing_count$"t2020-01-31" <- -1
-
-states_update <- left_join(states_update, state_testing_count, by = c("STUSPS"="state"))
-
-for (i in 1:233){ #+1 everyday
-   den <- names(states_update)[21 + i]
-   for (j in 1:56){
-      if (is.na(states_update[j,paste("t",den, sep = "")])) {
-         states_update[j,paste("t",den, sep = "")]==-1
-         states_update[j,754+i] <- -1 #+3 everyday
-      } else {
-         yesterday_den <- as.Date(den)-1
-         if (is.na(states_update[j,paste("t",den, sep = "")])) {
-            states_update[j,paste("t",den, sep = "")] <- -1
-            states_update[j,754+i] <- -1
-         } else if (states_update[j,paste("t",den, sep = "")]-states_update[j,paste("t",yesterday_den, sep = "")] <= 0){
-            states_update[j,754+i] <- -1
-         } else {
-            states_update[j,754+i] <- states_update[j,den]/
-               (states_update[j,paste("t",den, sep = "")]-states_update[j,paste("t",yesterday_den, sep = "")])
-         }
-      }
-      if (states_update[j,754+i]>1) {
-         states_update[j,754+i] <- -1
-      }  
-   }
-   print(i)
-   names(states_update)[754+i] <- paste("tpos",den, sep = "")
-}
-
-states_update$"tpos2020-01-21" <- -1
-states_update$"tpos2020-01-24" <- -1
-states_update$"tpos2020-01-26" <- -1
-states_update$"tpos2020-01-30" <- -1
-states_update$"tpos2020-01-31" <- -1
-
-# seven day/weekly testing positivity 
-colstart <- ncol(states_update)
-for (i in 1:233){ #+1 everyday
-   den <- names(states_update)[21+i]
-   for (j in 1:56){
-      if (states_update[j,paste("t", den, sep = "")]==-1) {
-         states_update[j,colstart+i] <- -1
-      } else {
-         svn_den <- as.character(as.Date(den)-7)
-         sx_den <- as.character(as.Date(den)-6)
-         if (states_update[j,paste("t", svn_den, sep = "")]==-1 | 
-             is.null(states_update[j,sx_den]) |
-             states_update[j,paste("t",den, sep = "")]-states_update[j,paste("t",svn_den, sep = "")] <= 0){
-            states_update[j, colstart+i] <- -1
-            } else {
-               cases <- 0
-               for (k in which(colnames(states_update)==sx_den) : which(colnames(states_update)==den)){
-                  cases <- cases + states_update[j, k]
-               }
-            states_update[j, colstart+i] <- cases/
-               (states_update[j,paste("t",den, sep = "")]-states_update[j,paste("t",svn_den, sep = "")])
-         }
-      }
-      if (states_update[j, colstart+i]>1) {
-         states_update[j, colstart+i] <- -1
-      }  
-   }
-   print(i)
-   names(states_update)[colstart+i] <- paste("wtpos",den, sep = "")
-}
-
-states_update$"wtpos2020-01-21" <- -1
-states_update$"wtpos2020-01-24" <- -1
-states_update$"wtpos2020-01-26" <- -1
-states_update$"wtpos2020-01-30" <- -1
-states_update$"wtpos2020-01-31" <- -1
-
-st_write(states_update, "~/Documents/qlcovid/docs/states_update.geojson")
-# need to move the previous states_update.geojson before writing
-# need to update the zip file accordingly
-
 #1p3aCounty
 
 testing <- NULL
-county_hist <- read.csv("~/Documents/covid-atlas-research/Testing_Data/python/county_hist.csv")
+county_hist <- read.csv("C:/Users/Shadow/Documents/GitHub/covid-atlas-research/Testing_Data/python/county_hist.csv")
 county_hist$geoid <- as.numeric(county_hist$geoid)
 county_hist <- county_hist[-c(201:212)] #update this number every day
 
@@ -132,7 +23,7 @@ county_hist <- county_hist[, -c(1:7)]
 
 # write.csv(county_hist, "testing_county.csv")
 
-county_1p3a <- as.data.frame(st_read("~/Documents/qlcovid/docs/counties_update_processing.geojson"))
+county_1p3a <- as.data.frame(st_read("C:/Users/Shadow/Documents/GitHub/covid/docs/counties_update_processing.geojson"))
 county_1p3a$geoid <- as.numeric(county_1p3a$GEOID)
 county_hist$geoid <- as.numeric(as.character(county_hist$geoid))
 
@@ -171,39 +62,9 @@ names(county_1p3a)[14]
 names(county_1p3a)[15]
 names(county_1p3a)[258]
 
-for (i in 1:233){ # increase +1 everyday
-   den <- as.character(names(county_1p3a)[20+i-1])
-   for (j in 1:3216){
-      if (county_1p3a[j, paste("t",den, sep = "")]==-1) {
-         county_1p3a[j,745+i] <- -1 # this number +3 everyday
-      } else {
-         yesterday_den <- as.character(as.Date(den)-1)
-         if (county_1p3a[j, paste("t",yesterday_den, sep = "")]==-1) {
-            county_1p3a[j,745+i] <- -1
-         } else if (county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",yesterday_den, sep = "")] <= 0){
-            county_1p3a[j,745+i] <- -1
-         } else {
-            county_1p3a[j,745+i] <- county_1p3a[j,den]/
-               (county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",yesterday_den, sep = "")])
-         }
-      }
-      if (county_1p3a[j,745+i]>1) {
-         county_1p3a[j,745+i] <- -1
-      }  
-   }
-   print(i)
-   names(county_1p3a)[745+i] <- paste("tpos",den, sep = "")
-}
-
-county_1p3a$"tpos2020-01-21" <- -1
-county_1p3a$"tpos2020-01-24" <- -1
-county_1p3a$"tpos2020-01-26" <- -1
-county_1p3a$"tpos2020-01-30" <- -1
-county_1p3a$"tpos2020-01-31" <- -1
-
 # seven day/weekly testing positivity 
 colstart <- ncol(county_1p3a)
-for (i in 1:233){ #+1 everyday
+for (i in 1:243){ #+1 everyday
    den <- names(county_1p3a)[19+i]
    for (j in 1:nrow(county_1p3a)){
       if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
@@ -229,17 +90,50 @@ for (i in 1:233){ #+1 everyday
       }  
    }
    print(i)
-   names(county_1p3a)[colstart+i] <- paste("wtpos",den, sep = "")
+   names(county_1p3a)[colstart+i] <- paste("ccpt",den, sep = "")
 }
 
-county_1p3a$"wtpos2020-01-21" <- -1
-county_1p3a$"wtpos2020-01-24" <- -1
-county_1p3a$"wtpos2020-01-26" <- -1
-county_1p3a$"wtpos2020-01-30" <- -1
-county_1p3a$"wtpos2020-01-31" <- -1
+county_1p3a$"ccpt2020-01-21" <- -1
+county_1p3a$"ccpt2020-01-24" <- -1
+county_1p3a$"ccpt2020-01-26" <- -1
+county_1p3a$"ccpt2020-01-30" <- -1
+county_1p3a$"ccpt2020-01-31" <- -1
+
+
+colstart <- ncol(county_1p3a)
+for (i in 1:243){ #+1 everyday
+   den <- names(county_1p3a)[19+i]
+   for (j in 1:nrow(county_1p3a)){
+      if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
+         county_1p3a[j,colstart+i] <- -1
+      } else {
+         svn_den <- as.character(as.Date(den)-7)
+         sx_den <- as.character(as.Date(den)-6)
+         if (county_1p3a[j, paste("t", svn_den, sep = "")]==-1 |
+             is.null(county_1p3a[j, sx_den]) |
+             county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")] <= 0){
+            county_1p3a[j, colstart+i] <- -1
+         } else {
+            county_1p3a[j, colstart+i] <- (((county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")])/7)/
+                                                county_1p3a[j, "population"]) * 100000
+         }
+      }
+      if (county_1p3a[j, "population"]==0) {
+         county_1p3a[j, colstart+i] <- -1
+      }  
+   }
+   print(i)
+   names(county_1p3a)[colstart+i] <- paste("tcap",den, sep = "")
+}
+
+county_1p3a$"tcap2020-01-21" <- -1
+county_1p3a$"tcap2020-01-24" <- -1
+county_1p3a$"tcap2020-01-26" <- -1
+county_1p3a$"tcap2020-01-30" <- -1
+county_1p3a$"tcap2020-01-31" <- -1
 
 # need to move the previous counties_update.geojson before writing
-st_write(county_1p3a, "~/Documents/qlcovid/docs/counties_update.geojson")
+st_write(county_1p3a, "C:/Users/Shadow/Documents/GitHub/covid/docs/counties_update.geojson")
 # to add -  merge in the criteria column in the data file - county_criteria_1p3a.csv in the research repo
 # need to update the zip file accordingly
 
@@ -263,6 +157,17 @@ st_write(county_1p3a, "~/Documents/qlcovid/docs/counties_update.geojson")
 #               substr(names(merge)[i], 10, 11), "-",
 #               substr(names(merge)[i], 13, 14), sep = "")}
 #}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -295,7 +200,13 @@ change_date <- function(den){
 }
 
 # read in usafacts case data
-covid_confirmed_usafacts <- read_csv("~/Documents/qlcovid/docs/covid_confirmed_usafacts.csv")
+covid_confirmed_usafacts <- read_csv("C:/Users/Shadow/Documents/GitHub/covid/docs/covid_confirmed_usafacts.csv")
+#Merge Population
+county_pop <- read_csv("C:/Users/Shadow/Documents/GitHub/covid/data/county_pop.csv") %>% mutate_at("GEOID", as.numeric) %>% 
+   mutate_at("total_population", as.numeric) %>%
+   select(GEOID, population = total_population)
+covid_usafacts <- left_join(covid_confirmed_usafacts, county_pop, by = c("countyFIPS"="GEOID")) %>% 
+   mutate_at("population", ~replace(., is.na(.), 0))
 
 # merge testing data into usafacts data - see if missing rows/counties
 covid_usafacts <- left_join(covid_confirmed_usafacts, county_hist, by = c("countyFIPS"="geoid"))
@@ -315,36 +226,6 @@ covid_usafacts$criteria <- NULL
 ncol(covid_usafacts)
 names(covid_usafacts)[5]
 names(covid_usafacts)[261]
-
-
-for (i in 1:247){ #Update Daily
-   den <- names(covid_usafacts)[15+i-1]
-   new_case <- covid_usafacts[,15+i-1]-covid_usafacts[,15+i-2]
-   den <- change_date(den)
-   # caution - this relies on the order of the column - the confirmed cases must be in the right order
-   for (j in 1:3142){
-      if (is.na(covid_usafacts[j,paste("t",den, sep = "")])) {
-         covid_usafacts[j,paste("t",den, sep = "")]==-1
-         covid_usafacts[j,518+i] <- -1 #Update Daily
-      } else {
-         yesterday_den <- as.Date(den)-1
-         if (is.na(covid_usafacts[j,paste("t",den, sep = "")])) {
-            covid_usafacts[j,paste("t",yesterday_den, sep = "")]==-1
-            covid_usafacts[j,518+i] <- -1
-         } else if (covid_usafacts[j,paste("t",den, sep = "")]-covid_usafacts[j,paste("t",yesterday_den, sep = "")] <= 0){
-            covid_usafacts[j,518+i] <- -1
-         } else {
-            covid_usafacts[j,518+i] <- new_case[j,]/
-               (covid_usafacts[j,paste("t",den, sep = "")]-covid_usafacts[j,paste("t",yesterday_den, sep = "")])
-         }
-      }
-      if (covid_usafacts[j,518+i]>1) {
-         covid_usafacts[j,518+i] <- -1
-      }  
-   }
-   print(i)
-   names(covid_usafacts)[518+i] <- paste("tpos",den, sep = "")
-}
 
 
 # seven day/weekly testing positivity 
@@ -372,27 +253,51 @@ for (i in 1:247){ #+1 everyday
       }  
    }
    print(i)
-   names(covid_usafacts)[colstart+i] <- paste("wtpos",den, sep = "")
+   names(covid_usafacts)[colstart+i] <- paste("ccpt",den, sep = "")
 }
 
-covid_usafacts$"tpos2020-01-22" <- -1
-covid_usafacts$"tpos2020-01-23" <- -1
-covid_usafacts$"tpos2020-01-24" <- -1
-covid_usafacts$"tpos2020-01-25" <- -1
-covid_usafacts$"tpos2020-01-26" <- -1
-covid_usafacts$"tpos2020-01-27" <- -1
-covid_usafacts$"tpos2020-01-28" <- -1
-covid_usafacts$"tpos2020-01-29" <- -1
-covid_usafacts$"tpos2020-01-30" <- -1
-covid_usafacts$"tpos2020-01-31" <- -1
+covid_usafacts$"ccpt2020-01-22" <- -1
+covid_usafacts$"ccpt2020-01-23" <- -1
+covid_usafacts$"ccpt2020-01-24" <- -1
+covid_usafacts$"ccpt2020-01-25" <- -1
+covid_usafacts$"ccpt2020-01-26" <- -1
+covid_usafacts$"ccpt2020-01-27" <- -1
+covid_usafacts$"ccpt2020-01-28" <- -1
 
-covid_usafacts$"wtpos2020-01-22" <- -1
-covid_usafacts$"wtpos2020-01-23" <- -1
-covid_usafacts$"wtpos2020-01-24" <- -1
-covid_usafacts$"wtpos2020-01-25" <- -1
-covid_usafacts$"wtpos2020-01-26" <- -1
-covid_usafacts$"wtpos2020-01-27" <- -1
-covid_usafacts$"wtpos2020-01-28" <- -1
+colstart <- ncol(covid_usafacts)
+for (i in 1:247){ #+1 everyday
+   den <- names(covid_usafacts)[11+i]
+   cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
+   # caution - relies on the order of column!!!
+   den <- change_date(den)
+   svn_den <- as.character(as.Date(den)-7)
+   for (j in 1:nrow(covid_usafacts)){
+      if (covid_usafacts[j,paste("t", den, sep = "")]==-1) {
+         covid_usafacts[j,colstart+i] <- -1
+      } else {
+         if (covid_usafacts[j, paste("t", svn_den, sep = "")]==-1 |
+             covid_usafacts[j,paste("t",den, sep = "")]-covid_usafacts[j,paste("t",svn_den, sep = "")] <= 0){
+            covid_usafacts[j, colstart+i] <- -1
+         } else {
+            covid_usafacts[j, colstart+i] <- (((covid_usafacts[j,paste("t",den, sep = "")]-covid_usafacts[j,paste("t",svn_den, sep = "")])/7)/
+                                                covid_usafacts[j, "population"]) * 100000
+         }
+      }
+      if (covid_usafacts[j, "population"]==0) {
+         covid_usafacts[j, colstart+i] <- -1
+      }  
+   }
+   print(i)
+   names(covid_usafacts)[colstart+i] <- paste("tcap",den, sep = "")
+}
+
+covid_usafacts$"tcap2020-01-22" <- -1
+covid_usafacts$"tcap2020-01-23" <- -1
+covid_usafacts$"tcap2020-01-24" <- -1
+covid_usafacts$"tcap2020-01-25" <- -1
+covid_usafacts$"tcap2020-01-26" <- -1
+covid_usafacts$"tcap2020-01-27" <- -1
+covid_usafacts$"tcap2020-01-28" <- -1
 
 
 testing_usafacts <- covid_usafacts %>% 
@@ -402,25 +307,22 @@ for (i in 5:ncol(testing_usafacts)){
    names(testing_usafacts)[i] <- paste(as.character(as.numeric(substr(names(testing_usafacts)[i],7,8))), "/",
                                        as.character(as.numeric(substr(names(testing_usafacts)[i],10,11))), "/", "20", sep = "")
 }
-
 write.csv(testing_usafacts,'testing_usafacts.csv')
 
-testingpos_usafacts <- covid_usafacts %>% 
-   select(countyFIPS, "County Name", State, "stateFIPS",
-          starts_with("tpos2020"))
-for (i in 5:ncol(testingpos_usafacts)){
-   names(testingpos_usafacts)[i] <- paste(as.character(as.numeric(substr(names(testingpos_usafacts)[i],10,11))), "/",
-                                          as.character(as.numeric(substr(names(testingpos_usafacts)[i],13,14))), "/", "20", sep = "")
+Testingccpt_usafacts <- covid_usafacts %>% 
+   select(countyFIPS, "County Name", State, "stateFIPS", 
+          starts_with("ccpt2020"))
+for (i in 5:ncol(Testingccpt_usafacts)){
+   names(Testingccpt_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],7,8))), "/",
+                                       as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],10,11))), "/", "20", sep = "")
 }
+write.csv(Testingccpt_usafacts,'Testingccpt_usafacts.csv')
 
-write.csv(testingpos_usafacts,'testingpos_usafacts.csv')
-
-testingwkpos_usafacts <- covid_usafacts %>% 
-   select(countyFIPS, "County Name", State, "stateFIPS",
-          starts_with("wtpos2020"))
-for (i in 5:ncol(testingwkpos_usafacts)){
-   names(testingwkpos_usafacts)[i] <- paste(as.character(as.numeric(substr(names(testingwkpos_usafacts)[i],11,12))), "/",
-                                          as.character(as.numeric(substr(names(testingwkpos_usafacts)[i],14,15))), "/", "20", sep = "")
+Testingtcap_usafacts <- covid_usafacts %>% 
+   select(countyFIPS, "County Name", State, "stateFIPS", 
+          starts_with("tcap2020"))
+for (i in 5:ncol(Testingtcap_usafacts)){
+   names(Testingtcap_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],7,8))), "/",
+                                           as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],10,11))), "/", "20", sep = "")
 }
-
-write.csv(testingwkpos_usafacts,'testingwkpos_usafacts.csv')
+write.csv(Testingtcap_usafacts,'Testingtcap_usafacts.csv')

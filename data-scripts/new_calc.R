@@ -68,7 +68,7 @@ new_num$"t2020-01-30" <- -1
 new_num$"t2020-01-31" <- -1
 
 
-states_update <- as.data.frame(st_read("~/Desktop/covid-add-weekpos/docs/states_update_processing.geojson"))
+states_update <- as.data.frame(st_read("~/Documents/GitHub/docs/states_update_processing.geojson"))
 for (i in 17:264) {#update this number every day
   names(states_update)[i] <- 
     paste(substr(names(states_update)[i], 2, 5), "-",
@@ -200,10 +200,7 @@ states_update$"tcap2020-01-26" <- -1
 states_update$"tcap2020-01-30" <- -1
 states_update$"tcap2020-01-31" <- -1
 
-
-
-
-st_write(states_update, "~/Desktop/covid-add-weekpos/docs/states_update.geojson")
+st_write(states_update, "~/Documents/GitHub/docs/states_update.geojson")
 
 
 
