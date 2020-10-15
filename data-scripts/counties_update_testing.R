@@ -12,7 +12,7 @@ county_hist <- read.csv("C:/Users/Shadow/Documents/GitHub/covid-atlas-research/T
 county_hist$geoid <- as.numeric(county_hist$geoid)
 county_hist <- county_hist[-c(201:212)] #update this number every day
 
-for (i in 9:255) {#update this number every day
+for (i in 9:ncol(county_hist)) {#update this number every day
    names(county_hist)[i] <- 
       paste("t", substr(names(county_hist)[i], 2, 5), "-",
             substr(names(county_hist)[i], 7, 8), "-",
@@ -27,14 +27,14 @@ county_1p3a <- as.data.frame(st_read("C:/Users/Shadow/Documents/GitHub/covid/doc
 county_1p3a$geoid <- as.numeric(county_1p3a$GEOID)
 county_hist$geoid <- as.numeric(as.character(county_hist$geoid))
 
-for (i in 15:252) {#update this number every day
+for (i in 15:262) {#update this number every day
    names(county_1p3a)[i] <- 
       paste(substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
             substr(names(county_1p3a)[i], 10, 11), sep = "")
 }
 
-for (i in 253:490) {#update this number every day 254-17+255
+for (i in 263:(ncol(county_1p3a)-4)) {#update this number every day 254-17+255
    names(county_1p3a)[i] <- 
       paste("d", substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
@@ -60,7 +60,7 @@ county_1p3a$"t2020-01-31" <- -1
 #testing_state[,3:223][is.na(testing_state[,3:223])] <- -1 
 names(county_1p3a)[14]
 names(county_1p3a)[15]
-names(county_1p3a)[258]
+names(county_1p3a)[263]
 
 # seven day/weekly testing positivity 
 colstart <- ncol(county_1p3a)
@@ -209,7 +209,7 @@ covid_usafacts <- left_join(covid_confirmed_usafacts, county_pop, by = c("county
    mutate_at("population", ~replace(., is.na(.), 0))
 
 # merge testing data into usafacts data - see if missing rows/counties
-covid_usafacts <- left_join(covid_confirmed_usafacts, county_hist, by = c("countyFIPS"="geoid"))
+covid_usafacts <- left_join(covid_usafacts, county_hist, by = c("countyFIPS"="geoid"))
 
 # calculate testing positivity rate
 covid_usafacts$"t2020-01-22" <- -1
@@ -223,14 +223,14 @@ covid_usafacts$"t2020-01-29" <- -1
 covid_usafacts$"t2020-01-30" <- -1
 covid_usafacts$"t2020-01-31" <- -1
 covid_usafacts$criteria <- NULL
-ncol(covid_usafacts)
-names(covid_usafacts)[5]
-names(covid_usafacts)[261]
+#ncol(covid_usafacts)
+#names(covid_usafacts)[5]
+#names(covid_usafacts)[261]
 
 
 # seven day/weekly testing positivity 
 colstart <- ncol(covid_usafacts)
-for (i in 1:247){ #+1 everyday
+for (i in 1:260){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!
@@ -265,7 +265,7 @@ covid_usafacts$"ccpt2020-01-27" <- -1
 covid_usafacts$"ccpt2020-01-28" <- -1
 
 colstart <- ncol(covid_usafacts)
-for (i in 1:247){ #+1 everyday
+for (i in 1:260){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!
