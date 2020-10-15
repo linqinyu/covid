@@ -6,8 +6,14 @@ library(tidyverse)
 library(dplyr)
 
 #1p3aState
+<<<<<<< Updated upstream
 state_testing_count <- read.csv("~/Documents/covid-atlas-research/Testing_Data/python/state_testing.csv")
 for (i in 3:259) {#update this number every day
+=======
+state_testing_count <- read.csv("~/Documents/GitHub/covid-atlas-research/Testing_Data/python/state_testing.csv")
+nc <- ncol(state_testing_count)
+for (i in 3:nc) {
+>>>>>>> Stashed changes
    names(state_testing_count)[i] <- 
       paste("t", substr(names(state_testing_count)[i], 2, 5), "-",
             substr(names(state_testing_count)[i], 6, 7), "-",
