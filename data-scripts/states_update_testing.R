@@ -69,6 +69,11 @@ new_num$"t2020-01-31" <- -1
 
 
 states_update <- as.data.frame(st_read("~/Documents/GitHub/lqycovid/docs/states_update_processing.geojson"))
+states_update["VI", "population"] = 106977
+states_update["MP", "population"] = 56882
+states_update["GU", "population"] = 165768
+states_update["AS", "population"] = 55465
+  
 for (i in 17:264) {#update this number every day
   names(states_update)[i] <- 
     paste(substr(names(states_update)[i], 2, 5), "-",
