@@ -1,4 +1,4 @@
-#Last Update: 1014
+#Last Update: 1015
 
 #run 1p3a.py, save county geojson as csv file in /docs
 
@@ -29,14 +29,14 @@ county_1p3a <- as.data.frame(st_read("C:/Users/Shadow/Documents/GitHub/covid/doc
 county_1p3a$geoid <- as.numeric(county_1p3a$GEOID)
 county_hist$geoid <- as.numeric(as.character(county_hist$geoid))
 
-for (i in 15:262) {#update this number every day
+for (i in 15:263) {#update this number every day
    names(county_1p3a)[i] <- 
       paste(substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
             substr(names(county_1p3a)[i], 10, 11), sep = "")
 }
 
-for (i in 263:(ncol(county_1p3a)-4)) {#update this number every day 254-17+255
+for (i in 264:(ncol(county_1p3a)-4)) {#update this number every day 254-17+255
    names(county_1p3a)[i] <- 
       paste("d", substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
@@ -66,7 +66,7 @@ names(county_1p3a)[263]
 
 # seven day/weekly testing positivity 
 colstart <- ncol(county_1p3a)
-for (i in 1:243){ #+1 everyday
+for (i in 1:244){ #+1 everyday
    den <- names(county_1p3a)[19+i]
    for (j in 1:nrow(county_1p3a)){
       if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
@@ -103,7 +103,7 @@ county_1p3a$"ccpt2020-01-31" <- -1
 
 
 colstart <- ncol(county_1p3a)
-for (i in 1:243){ #+1 everyday
+for (i in 1:244){ #+1 everyday
    den <- names(county_1p3a)[19+i]
    for (j in 1:nrow(county_1p3a)){
       if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
@@ -236,7 +236,7 @@ covid_usafacts$criteria <- NULL
 
 # seven day/weekly testing positivity 
 colstart <- ncol(covid_usafacts)
-for (i in 1:260){ #+1 everyday
+for (i in 1:261){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!
@@ -271,7 +271,7 @@ covid_usafacts$"ccpt2020-01-27" <- -1
 covid_usafacts$"ccpt2020-01-28" <- -1
 
 colstart <- ncol(covid_usafacts)
-for (i in 1:260){ #+1 everyday
+for (i in 1:261){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!
@@ -319,8 +319,8 @@ Testingccpt_usafacts <- covid_usafacts %>%
    select(countyFIPS, "County Name", State, "stateFIPS", 
           starts_with("ccpt2020"))
 for (i in 5:ncol(Testingccpt_usafacts)){
-   names(Testingccpt_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],7,8))), "/",
-                                       as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],10,11))), "/", "20", sep = "")
+   names(Testingccpt_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],10,11))), "/",
+                                       as.character(as.numeric(substr(names(Testingccpt_usafacts)[i],13,14))), "/", "20", sep = "")
 }
 write.csv(Testingccpt_usafacts,'Testingccpt_usafacts.csv')
 
@@ -328,7 +328,7 @@ Testingtcap_usafacts <- covid_usafacts %>%
    select(countyFIPS, "County Name", State, "stateFIPS", 
           starts_with("tcap2020"))
 for (i in 5:ncol(Testingtcap_usafacts)){
-   names(Testingtcap_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],7,8))), "/",
-                                           as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],10,11))), "/", "20", sep = "")
+   names(Testingtcap_usafacts)[i] <- paste(as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],10,11))), "/",
+                                           as.character(as.numeric(substr(names(Testingtcap_usafacts)[i],13,14))), "/", "20", sep = "")
 }
 write.csv(Testingtcap_usafacts,'Testingtcap_usafacts.csv')
