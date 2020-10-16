@@ -1,3 +1,5 @@
+#Last Update: 1014
+
 #run 1p3a.py, save county geojson as csv file in /docs
 
 setwd("C:/Users/Shadow/Documents/GitHub/covid/docs")
@@ -207,6 +209,10 @@ county_pop <- read_csv("C:/Users/Shadow/Documents/GitHub/covid/data/county_pop.c
    select(GEOID, population = total_population)
 covid_usafacts <- left_join(covid_confirmed_usafacts, county_pop, by = c("countyFIPS"="GEOID")) %>% 
    mutate_at("population", ~replace(., is.na(.), 0))
+covid_usafacts[1831, "population"] = 1418207
+covid_usafacts[1852, "population"] = 2559903
+covid_usafacts[1869, "population"] = 2253858
+covid_usafacts[1871, "population"] = 476143
 
 # merge testing data into usafacts data - see if missing rows/counties
 covid_usafacts <- left_join(covid_usafacts, county_hist, by = c("countyFIPS"="geoid"))
