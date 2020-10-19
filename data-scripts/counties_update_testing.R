@@ -1,4 +1,4 @@
-#Last Update: 1015
+#Last Update: 1018
 
 #run 1p3a.py, save county geojson as csv file in /docs
 
@@ -29,14 +29,14 @@ county_1p3a <- as.data.frame(st_read("C:/Users/Shadow/Documents/GitHub/covid/doc
 county_1p3a$geoid <- as.numeric(county_1p3a$GEOID)
 county_hist$geoid <- as.numeric(as.character(county_hist$geoid))
 
-for (i in 15:263) {#update this number every day
+for (i in 15:266) {#update this number every day
    names(county_1p3a)[i] <- 
       paste(substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
             substr(names(county_1p3a)[i], 10, 11), sep = "")
 }
 
-for (i in 264:(ncol(county_1p3a)-4)) {#update this number every day 254-17+255
+for (i in 267:(ncol(county_1p3a)-4)) {#update this number every day 254-17+255
    names(county_1p3a)[i] <- 
       paste("d", substr(names(county_1p3a)[i], 2, 5), "-",
             substr(names(county_1p3a)[i], 7, 8), "-",
@@ -66,7 +66,7 @@ names(county_1p3a)[263]
 
 # seven day/weekly testing positivity 
 colstart <- ncol(county_1p3a)
-for (i in 1:244){ #+1 everyday
+for (i in 1:247){ #+1 everyday
    den <- names(county_1p3a)[19+i]
    for (j in 1:nrow(county_1p3a)){
       if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
@@ -74,6 +74,42 @@ for (i in 1:244){ #+1 everyday
       } else {
          svn_den <- as.character(as.Date(den)-7)
          sx_den <- as.character(as.Date(den)-6)
+         if (county_1p3a[j, paste("t", svn_den, sep = "")]==-1 |
+             is.null(county_1p3a[j, sx_den]) |
+             county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")] <= 0){
+            county_1p3a[j, colstart+i] <- -1
+         } else {
+            cases <- 0
+            for (k in which(colnames(county_1p3a)==sx_den) : which(colnames(county_1p3a)==den)){
+               cases <- cases + county_1p3a[j, k]
+            }
+            county_1p3a[j, colstart+i] <- -1
+         }
+      }
+      if (county_1p3a[j, colstart+i]>1) {
+         county_1p3a[j, colstart+i] <- -1
+      }  
+   }
+   print(i)
+   names(county_1p3a)[colstart+i] <- paste("wktpos",den, sep = "")
+}
+
+county_1p3a$"wktpos2020-01-21" <- -1
+county_1p3a$"wktpos2020-01-24" <- -1
+county_1p3a$"wktpos2020-01-26" <- -1
+county_1p3a$"wktpos2020-01-30" <- -1
+county_1p3a$"wktpos2020-01-31" <- -1
+
+#Fourteen day/weekly testing positivity 
+colstart <- ncol(county_1p3a)
+for (i in 1:240){ #+1 everyday
+   den <- names(county_1p3a)[26+i]
+   for (j in 1:nrow(county_1p3a)){
+      if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
+         county_1p3a[j,colstart+i] <- -1
+      } else {
+         svn_den <- as.character(as.Date(den)-14)
+         sx_den <- as.character(as.Date(den)-13)
          if (county_1p3a[j, paste("t", svn_den, sep = "")]==-1 |
              is.null(county_1p3a[j, sx_den]) |
              county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")] <= 0){
@@ -101,22 +137,22 @@ county_1p3a$"ccpt2020-01-26" <- -1
 county_1p3a$"ccpt2020-01-30" <- -1
 county_1p3a$"ccpt2020-01-31" <- -1
 
-
+#Fourteen day testing capacity
 colstart <- ncol(county_1p3a)
-for (i in 1:244){ #+1 everyday
-   den <- names(county_1p3a)[19+i]
+for (i in 1:240){ #+1 everyday
+   den <- names(county_1p3a)[26+i]
    for (j in 1:nrow(county_1p3a)){
       if (county_1p3a[j,paste("t", den, sep = "")]==-1) {
          county_1p3a[j,colstart+i] <- -1
       } else {
-         svn_den <- as.character(as.Date(den)-7)
-         sx_den <- as.character(as.Date(den)-6)
+         svn_den <- as.character(as.Date(den)-14)
+         sx_den <- as.character(as.Date(den)-13)
          if (county_1p3a[j, paste("t", svn_den, sep = "")]==-1 |
              is.null(county_1p3a[j, sx_den]) |
              county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")] <= 0){
             county_1p3a[j, colstart+i] <- -1
          } else {
-            county_1p3a[j, colstart+i] <- (((county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")])/7)/
+            county_1p3a[j, colstart+i] <- (((county_1p3a[j,paste("t",den, sep = "")]-county_1p3a[j,paste("t",svn_den, sep = "")])/14)/
                                                 county_1p3a[j, "population"]) * 100000
          }
       }
@@ -236,7 +272,7 @@ covid_usafacts$criteria <- NULL
 
 # seven day/weekly testing positivity 
 colstart <- ncol(covid_usafacts)
-for (i in 1:261){ #+1 everyday
+for (i in 1:264){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!
@@ -271,7 +307,7 @@ covid_usafacts$"ccpt2020-01-27" <- -1
 covid_usafacts$"ccpt2020-01-28" <- -1
 
 colstart <- ncol(covid_usafacts)
-for (i in 1:261){ #+1 everyday
+for (i in 1:264){ #+1 everyday
    den <- names(covid_usafacts)[11+i]
    cases <- covid_usafacts[,11+i]-covid_usafacts[,4+i]
    # caution - relies on the order of column!!!

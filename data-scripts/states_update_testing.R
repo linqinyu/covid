@@ -1,4 +1,4 @@
-#Last Update: 1015
+#Last Update: 1018
 
 library(dplyr)
 library(ggplot2)
@@ -76,14 +76,14 @@ states_update[55, "population"] = 165768
 states_update[56, "population"] = 55465
 
 
-for (i in 17:264) {#update this number every day
+for (i in 17:268) {#update this number every day
   names(states_update)[i] <- 
     paste(substr(names(states_update)[i], 2, 5), "-",
           substr(names(states_update)[i], 7, 8), "-",
           substr(names(states_update)[i], 10, 11), sep = "")
 }
 
-for (i in 265:(ncol(states_update)-3)) {#update this number every day 254-17+255
+for (i in 269:(ncol(states_update)-3)) {#update this number every day 254-17+255
   names(states_update)[i] <- 
     paste("d", substr(names(states_update)[i], 2, 5), "-",
           substr(names(states_update)[i], 7, 8), "-",
@@ -96,7 +96,7 @@ states_update <- left_join(states_update, new_num, by = c("STUSPS"="state"))
 
 # old calc positivity(7dMA)
 colstart <- ncol(states_update)
-for (i in 1:243){ #+1 everyday
+for (i in 1:247){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -141,7 +141,7 @@ states_update$"ccpt2020-01-31" <- -1
 
 #new calc positivity(7dMA)
 colstart <- ncol(states_update)
-for (i in 1:243){ #+1 everyday
+for (i in 1:247){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -177,7 +177,7 @@ states_update$"wktpos2020-01-31" <- -1
 
 # Testing Capacity (7dMA)
 colstart <- ncol(states_update)
-for (i in 1:243){ #+1 everyday
+for (i in 1:247){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -206,6 +206,8 @@ states_update$"tcap2020-01-24" <- -1
 states_update$"tcap2020-01-26" <- -1
 states_update$"tcap2020-01-30" <- -1
 states_update$"tcap2020-01-31" <- -1
+
+states_update <- states_update %>% select(-starts_with("pos2020"), -starts_with("t2020"))
 
 st_write(states_update, "~/Documents/GitHub/lqycovid/docs/states_update.geojson")
 
