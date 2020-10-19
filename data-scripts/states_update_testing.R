@@ -207,7 +207,7 @@ states_update$"tcap2020-01-26" <- -1
 states_update$"tcap2020-01-30" <- -1
 states_update$"tcap2020-01-31" <- -1
 
-states_update <- states_update %>% select(-starts_with("pos2020"), -starts_with("t2020"))
+states_update <- states_update %>% select(-starts_with("pos2020"))
 
 st_write(states_update, "~/Documents/GitHub/lqycovid/docs/states_update.geojson")
 
