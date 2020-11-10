@@ -1,39 +1,17 @@
-#Last Update: 1018
+# This script will take the two state level testing scraping output, and the case and population data from the file in the main repo, and then process to output the four testing csv files needed for the front end.
 
 library(dplyr)
-library(ggplot2)
 library(sf)
 
-#states_update <- st_read("~/Documents/GitHub/lqycovid/docs/states_update.geojson")
-
-#data <- read.csv("https://api.covidtracking.com/v1/states/daily.csv") %>% mutate(posposc = positive - positiveCasesViral) %>%
-#  select(date, positiveIncrease, totalTestResultsIncrease) %>% mutate(posrate = positiveIncrease/totalTestResultsIncrease) %>%
-  
-#plot(data$posrate)
-
-#data_ms <- read.csv("https://api.covidtracking.com/v1/states/ms/daily.csv") %>% mutate(posposc = positive - positiveCasesViral) %>%
-#  select(date, positiveIncrease, totalTestResultsIncrease) %>% mutate(posrate = positiveIncrease/totalTestResultsIncrease)
-#plot(data_ms$posrate)
-
-#Use positiveCasesViral as positive test results.
-#data_ok <- read.csv("https://api.covidtracking.com/v1/states/ok/daily.csv") %>% mutate(posposc = positive - positiveCasesViral) %>%
-#  select(date, positiveIncrease, totalTestResultsIncrease) %>% mutate(posrate = positiveIncrease/totalTestResultsIncrease)
-#plot(data_ok$posrate)
-
-#data_tx <- read.csv("https://api.covidtracking.com/v1/states/tx/daily.csv") %>% mutate(posposc = positive - positiveCasesViral) %>%
-#  select(date, positiveIncrease, totalTestResultsIncrease) %>% mutate(posrate = positiveIncrease/totalTestResultsIncrease)
-#plot(data_ms$posrate)
-
-#data_pr <- read.csv("https://api.covidtracking.com/v1/states/pr/daily.csv") %>% mutate(posposc = positive - positiveCasesViral) %>%
-#  select(date, positiveIncrease, totalTestResultsIncrease) %>% mutate(posrate = positiveIncrease/totalTestResultsIncrease)
-#plot(data_ms$posrate)
-
-### Old Calculation
-#old_calc <- read.csv("~/Desktop/old_calc.csv") 
-
-### New Calculation Files
+### Take Testing Input (in research repo)
 new_pos <- read.csv("~/Documents/GitHub/covid-atlas-research/Testing_Data/python/state_testing_positive.csv")
 new_num <- read.csv("~/Documents/GitHub/covid-atlas-research/Testing_Data/python/state_testing_numbers.csv")
+
+today_date <- sub(".", "", colnames(new_pos[3]))
+today_date <- paste(substr(today_date, 1, 4), "-", substr(today_date, 5, 6), "-", substr(today_date, 7, 8), sep = "")
+today_date <- as.Date(today_date)
+ref <- as.Date("2020-11-09")
+diff <- as.numeric(difftime(today_date, ref, units = "days"))
 
 # Rename Columns
 nc <- ncol(new_num)
@@ -68,6 +46,7 @@ new_num$"t2020-01-30" <- -1
 new_num$"t2020-01-31" <- -1
 
 
+# Take population info (needs to change to main repo csv)
 states_update <- as.data.frame(st_read("~/Documents/GitHub/lqycovid/docs/states_update_processing.geojson"))
 
 states_update[53, "population"] = 106977
@@ -75,15 +54,16 @@ states_update[54, "population"] = 56882
 states_update[55, "population"] = 165768
 states_update[56, "population"] = 55465
 
+datenum = 269 + diff
 
-for (i in 17:268) {#update this number every day
+for (i in 17:(290+diff)) {
   names(states_update)[i] <- 
     paste(substr(names(states_update)[i], 2, 5), "-",
           substr(names(states_update)[i], 7, 8), "-",
           substr(names(states_update)[i], 10, 11), sep = "")
 }
 
-for (i in 269:(ncol(states_update)-3)) {#update this number every day 254-17+255
+for (i in (291+diff):(ncol(states_update)-3)) {
   names(states_update)[i] <- 
     paste("d", substr(names(states_update)[i], 2, 5), "-",
           substr(names(states_update)[i], 7, 8), "-",
@@ -94,9 +74,10 @@ states_update <- left_join(states_update, new_pos, by = c("STUSPS"="state"))
 states_update <- left_join(states_update, new_num, by = c("STUSPS"="state"))
 
 
-# old calc positivity(7dMA)
+# Calculations
+## old calc positivity(7dMA)
 colstart <- ncol(states_update)
-for (i in 1:247){ #+1 everyday
+for (i in 1:datenum){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -131,17 +112,9 @@ states_update$"ccpt2020-01-26" <- -1
 states_update$"ccpt2020-01-30" <- -1
 states_update$"ccpt2020-01-31" <- -1
 
-
-
-
-
-
-
-
-
-#new calc positivity(7dMA)
+## new calc positivity(7dMA)
 colstart <- ncol(states_update)
-for (i in 1:247){ #+1 everyday
+for (i in 1:datenum){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -171,13 +144,9 @@ states_update$"wktpos2020-01-26" <- -1
 states_update$"wktpos2020-01-30" <- -1
 states_update$"wktpos2020-01-31" <- -1
 
-
-
-
-
-# Testing Capacity (7dMA)
+## Testing Capacity (7dMA)
 colstart <- ncol(states_update)
-for (i in 1:247){ #+1 everyday
+for (i in 1:datenum){ #+1 everyday
   den <- names(states_update)[21+i]
   for (j in 1:56){
     if (states_update[j,paste("t", den, sep = "")]==-1) {
@@ -209,56 +178,43 @@ states_update$"tcap2020-01-31" <- -1
 
 states_update <- states_update %>% select(-starts_with("pos2020"))
 
-st_write(states_update, "~/Documents/GitHub/lqycovid/docs/states_update.geojson")
 
 
+# Wrting the csv files (write to main repo csv folder)
+
+testing <- states_update %>% 
+  select(countyFIPS, "County Name", State, "stateFIPS", 
+         starts_with("t2020"))
+for (i in 5:ncol(testing)){
+  names(testing)[i] <- paste(as.character(as.numeric(substr(names(testing)[i],7,8))), "/",
+                                      as.character(as.numeric(substr(names(testing)[i],10,11))), "/", "20", sep = "")
+}
+write.csv(testing,'testing.csv')
+
+Testingccpt <- states_update %>% 
+  select(countyFIPS, "County Name", State, "stateFIPS", 
+         starts_with("ccpt2020"))
+for (i in 5:ncol(Testingccpt)){
+  names(Testingccpt)[i] <- paste(as.character(as.numeric(substr(names(Testingccpt)[i],10,11))), "/",
+                                          as.character(as.numeric(substr(names(Testingccpt)[i],13,14))), "/", "20", sep = "")
+}
+write.csv(Testingccpt,'Testingccpt.csv')
+
+Testingtcap <- states_update %>% 
+  select(countyFIPS, "County Name", State, "stateFIPS", 
+         starts_with("tcap2020"))
+for (i in 5:ncol(Testingtcap)){
+  names(Testingtcap)[i] <- paste(as.character(as.numeric(substr(names(Testingtcap)[i],10,11))), "/",
+                                          as.character(as.numeric(substr(names(Testingtcap)[i],13,14))), "/", "20", sep = "")
+}
+write.csv(Testingtcap,'Testingtcap.csv')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Plot Old Calc
-old_calc_wtpos <- old_calc %>% select(STUSPS, starts_with("wtpos2020"))
-dates <- grep("^wtpos", names(old_calc_wtpos), value = TRUE)
-subdat <- old_calc_wtpos[old_calc_wtpos$STUSPS=="MS", dates] %>% 
-  select(-wtpos2020.01.21, -wtpos2020.01.24, -wtpos2020.01.26, -wtpos2020.01.30, -wtpos2020.01.31)
-subdat_l <- data.frame(date = factor(1:233),
-                       Value = unlist(subdat))
-plot(subdat_l)
-
-ggplot(subdat_l, aes(x=date, y=Value))
-
-# Plot New Calc
-new_calc_wtpos <- states_update %>% select(state, starts_with("wtpos2020"))
-dates_new <- grep("^wtpos", names(new_calc_wtpos), value = TRUE)
-subdat_new <- new_calc_wtpos[new_calc_wtpos$state=="MS", dates_new] 
-subdat_new_l <- data.frame(data = factor(257:1),
-                           Value = unlist(subdat_new))
-subdat_new_l <- data.frame(subdat_new_l[order(nrow(subdat_new_l):1),])
-
-
-plot(subdat_new_l)
-
-write_csv(states_update, "~/Documents/GitHub/covid-atlas-research/Testing_Data/python/state_calc_new.csv")
+Testingwktpos <- states_update %>% 
+  select(countyFIPS, "County Name", State, "stateFIPS", 
+         starts_with("tcap2020"))
+for (i in 5:ncol(Testingwktpos)){
+  names(Testingwktpos)[i] <- paste(as.character(as.numeric(substr(names(Testingwktpos)[i],10,11))), "/",
+                                          as.character(as.numeric(substr(names(Testingwktpos)[i],13,14))), "/", "20", sep = "")
+}
+write.csv(Testingwktpos,'Testingwktpos.csv')
