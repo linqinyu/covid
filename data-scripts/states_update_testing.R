@@ -178,43 +178,4 @@ states_update$"tcap2020-01-31" <- -1
 
 states_update <- states_update %>% select(-starts_with("pos2020"))
 
-
-
-# Wrting the csv files (write to main repo csv folder)
-
-testing <- states_update %>% 
-  select(countyFIPS, "County Name", State, "stateFIPS", 
-         starts_with("t2020"))
-for (i in 5:ncol(testing)){
-  names(testing)[i] <- paste(as.character(as.numeric(substr(names(testing)[i],7,8))), "/",
-                                      as.character(as.numeric(substr(names(testing)[i],10,11))), "/", "20", sep = "")
-}
-write.csv(testing,'testing.csv')
-
-Testingccpt <- states_update %>% 
-  select(countyFIPS, "County Name", State, "stateFIPS", 
-         starts_with("ccpt2020"))
-for (i in 5:ncol(Testingccpt)){
-  names(Testingccpt)[i] <- paste(as.character(as.numeric(substr(names(Testingccpt)[i],10,11))), "/",
-                                          as.character(as.numeric(substr(names(Testingccpt)[i],13,14))), "/", "20", sep = "")
-}
-write.csv(Testingccpt,'Testingccpt.csv')
-
-Testingtcap <- states_update %>% 
-  select(countyFIPS, "County Name", State, "stateFIPS", 
-         starts_with("tcap2020"))
-for (i in 5:ncol(Testingtcap)){
-  names(Testingtcap)[i] <- paste(as.character(as.numeric(substr(names(Testingtcap)[i],10,11))), "/",
-                                          as.character(as.numeric(substr(names(Testingtcap)[i],13,14))), "/", "20", sep = "")
-}
-write.csv(Testingtcap,'Testingtcap.csv')
-
-
-Testingwktpos <- states_update %>% 
-  select(countyFIPS, "County Name", State, "stateFIPS", 
-         starts_with("tcap2020"))
-for (i in 5:ncol(Testingwktpos)){
-  names(Testingwktpos)[i] <- paste(as.character(as.numeric(substr(names(Testingwktpos)[i],10,11))), "/",
-                                          as.character(as.numeric(substr(names(Testingwktpos)[i],13,14))), "/", "20", sep = "")
-}
-write.csv(Testingwktpos,'Testingwktpos.csv')
+st_write(states_update, "~/Documents/GitHub/lqycovid/docs/states_update.geojson")
