@@ -1,109 +1,113 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { setCentroids, storeData, setGeodaProxy, setCurrentData, setDates, setColumnNames, setDate, setDateIndex, setBins, set3D } from './actions';
 import { useSelector, useDispatch } from 'react-redux';
-import { setGeoid, storeData } from './actions';
-import * as d3 from 'd3-dsv';
-import * as _ from 'lodash';
-
-async function getParseCSV(url){
-  const tempData = await fetch(url).then(function(response) {
-    return response.ok ? response.text() : Promise.reject(response.status);
-    }).then(function(text) {
-      return d3.csvParse(text, d3.autoType);
-  });
-  console.log(Date.now());
-  console.log('got csv');
-  return tempData;
-}
-
-async function getJson(url){
-  const tempData = await fetch(url)
-    .then(response => response.json())
-    .then(data => {return data});
-    
-  console.log('got json');
-  console.log(Date.now());
-  return tempData;
-}
-
-function mergeData(featureCollection, featureCollectionJoinCol, joinData, joinDataNames, joinDataCol) {
-  console.log(Date.now());
-  console.log('started merging');
-  // declare parent dictionaries
-  let features = {}
-  let dataDicts = {}
-
-  // declare and prep feature collection object
-  let i = featureCollection.features.length;
-  let colNumCheck = parseInt(featureCollection.features[0].properties[featureCollectionJoinCol])
-  if (Number.isInteger(colNumCheck)) {
-    while (i>0) {
-      i--;
-      features[parseInt(featureCollection.features[i].properties[featureCollectionJoinCol])] = featureCollection.features[i];
-    }
-  } else {
-    while (i>0) {
-      i--;
-      features[featureCollection.features[i].properties[featureCollectionJoinCol]] = featureCollection.features[i];
-    }
-  }
-
-  // declare data objects
-  for (let n=0; n < joinDataNames.length; n++) {
-    dataDicts[`${joinDataNames[n]}`] = {}
-  }
-
-  // loop through data and add to dictionaries
-  i = joinData[0].length;
-  while (i>0) {
-    i--;
-    for (let n=0; n<joinData.length; n++) {
-      dataDicts[joinDataNames[n]][joinData[n][i][joinDataCol]] = {[`${joinDataNames[n]}`]: joinData[n][i]}
-    }
-  }
-
-  // use lodash to merge data
-  let merged = _.merge(features, dataDicts[joinDataNames[0]])
-  for (let n=1; n < joinDataNames.length; n++){
-    merged = _.merge(merged, dataDicts[joinDataNames[n]])
-  }
-  return merged;
-}
+import GeodaProxy from './GeodaProxy.js';
+import { getParseCSV, getJson, mergeData, colIndex, getDataForBins } from './utils';
+import { Map, DateSlider } from './components';
 
 function App() {
-
-  const geoid = useSelector(state => state.currentGeoid);
   const storedData = useSelector(state => state.storedData);
-  const dispatch = useDispatch();
-  
-  async function loadData(geojson, csvs, joinCols, names) {
-    console.log(Date.now())
-    const csvPromises = csvs.map(csv => getParseCSV(`${process.env.PUBLIC_URL}/csv/${csv}.csv`).then(result => {return result}))
+  const currentData = useSelector(state => state.currentData);
+  const gda_proxy = useSelector(state => state.geodaProxy);
+  const dataFn = useSelector(state => state.currentDataFn);
+  const columnNames = useSelector(state => state.cols);
+  const currDate = useSelector(state => state.currDate);
+  const currDateIndex = useSelector(state => state.currDateIndex);
+  const dates = useSelector(state => state.dates);
+  const bins = useSelector(state => state.bins);
+  const binMode = useSelector(state => state.binMode);
 
+  const dispatch = useDispatch();  
+  
+  const getCentroids = (geojson, gda_proxy) =>  dispatch(setCentroids(gda_proxy.GetCentroids(geojson), geojson))
+  
+  const getDates = (data, table, geojson) =>  {
+    let dates = findDates(data[table])
+    dispatch(setDates(dates, geojson))
+    dispatch(setDate(dates.slice(-1,)[0]))
+    dispatch(setDateIndex(colIndex(data, table, dates.slice(-1,)[0])))
+  }
+
+  const findDates = (data) => {
+    for (let i = 0; i < data.length; i++) {
+      if (Date.parse(data[i])) {
+        return data.slice(i,)
+      }
+    }
+    return;
+  }
+
+  const getColumns = (data, names) => {
+    let rtn = {};
+    for (let i=0; i < data.length; i++) {
+      rtn[names[i]] = data[i][1]
+    }
+  return rtn;
+  }
+
+  async function loadData(geojson, csvs, joinCols, names) {
+    const csvPromises = csvs.map(csv => getParseCSV(`${process.env.PUBLIC_URL}/csv/${csv}.csv`, joinCols[1]).then(result => {return result}))
     Promise.all([
-      getJson(`${process.env.PUBLIC_URL}/geojson/${geojson}.geojson`),
+      getJson(`${process.env.PUBLIC_URL}/geojson/${geojson}`, gda_proxy),
       ...csvPromises
     ]).then(values => {
-        dispatch(storeData(mergeData(values[0], joinCols[0], values.slice(1,), names, joinCols[1]), geojson));
-        console.log(Date.now());
-      }
-    )
+      // console.log(values.slice(1,))
+      dispatch(storeData(mergeData(values[0], joinCols[0], values.slice(1,), names, joinCols[1]),geojson));
+      dispatch(setCurrentData(geojson))
+      dispatch(setColumnNames(getColumns(values.slice(1,), names), geojson))
+    })    
   }
 
-  var test = () => {
-    try {
-      return storedData['county_usfacts'][1001]['type']
-    } catch {
-      return 'no data'
+  // After runtime is initialized, this loads in gda_proxy to the state
+  useEffect(() => {
+    if (gda_proxy === null) {
+      dispatch(setGeodaProxy(new GeodaProxy()))
     }
-  }
+  },[window.Module])
+
+  // on initial load and after gda_proxy has been initialized, this loads in the default data sets (USA Facts)
+  useEffect(() => {
+    if ((gda_proxy != null) && (currentData == '')) {
+      loadData(
+        'county_usfacts.geojson', 
+        ['covid_confirmed_usafacts','covid_deaths_usafacts', 'berkeley_predictions', 'chr_health_context', 'chr_life', 'chr_health_factors'], 
+        ['GEOID', 'FIPS'], 
+        ['cases','deaths', 'predictions', 'chr_health_context', 'chr_life', 'chr_health_factors']
+      )
+    }
+  },[gda_proxy])
+
+  // whenever the current data changes, this 
+  useEffect(() => {
+    if (currentData != '') {
+      if (!dates.hasOwnProperty(currentData)){
+        getCentroids(currentData, gda_proxy)
+        getDates(columnNames[currentData], 'cases', currentData)
+      }
+    } 
+  },[columnNames])
+
+  // whenever the current date index changes, this 
+  useEffect(() => {
+    if (currDateIndex != '') {
+      if (binMode == 'dynamic') {
+        let nb = gda_proxy.custom_breaks(currentData, "natural_breaks", 8, null, getDataForBins(dataFn, storedData[currentData], 'cases', currDateIndex, 7))
+        dispatch(setBins(nb.bins, [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]))
+      } else if (!bins.hasOwnProperty('bins')) {
+        let nb = gda_proxy.custom_breaks(currentData, "natural_breaks", 8, null, getDataForBins(dataFn, storedData[currentData], 'cases', currDateIndex, 7))
+        dispatch(setBins(nb.bins, [-Math.pow(10, 12), ...nb.breaks.slice(1,-1), Math.pow(10, 12)]))
+      } else {}
+    } 
+  },[currDateIndex])
 
   return (
     <div className="App">
-      <header className="App-header">
-        Hello. The GEOID is {geoid}<br/>
-        Stored data = {test()}<br/>
-        <button onClick={() => loadData('county_usfacts', ['covid_confirmed_usafacts','covid_deaths_usafacts'], ['GEOID', 'countyFIPS'], ['cases','deaths'])}>load data</button>
+      <header className="App-header" style={{position:'fixed', left: '20px', top:'20px', zIndex:10}}>
+        <h1 style={{color:"white"}}>Tech Demo</h1>
+        <button onClick={() => dispatch(set3D())}>3D</button>
       </header>
+      <Map />
+      <DateSlider />
     </div>
   );
 }
