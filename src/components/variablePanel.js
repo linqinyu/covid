@@ -1,6 +1,8 @@
+// state and reactivity
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+// UI elements
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -12,8 +14,10 @@ import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Switch from '@material-ui/core/Switch';
 
+// scoped CSS
 import styled from 'styled-components';
 
+// utils and helper components
 import { colLookup } from '../utils'; //getGzipData, getArrayCSV
 import Tooltip from './tooltip';
 import { StyledDropDown, BinsContainer } from '../styled_components';
@@ -208,20 +212,15 @@ const ListSubheader = styled(MenuItem)`
 
 const VariablePanel = (props) => {
 
-  // const getGzipAndCentroids = async (gzipUrl, centroidsUrl) => {
-  //   Promise.all([
-  //       getGzipData(gzipUrl),
-  //       getArrayCSV(centroidsUrl)
-  //     ]).then(
-  //       values => dispatch(storeMobilityData({centroids: values[1], flows: values[0]}))
-  //   )
-  // } 
 
   const dispatch = useDispatch();    
 
   const { cols, currentData,  dataParams, mapParams, panelState, urlParams } = useSelector(state => state); 
   // currentVariable, currentZVariable, storedMobilityData
   const [bivariateZ, setBivariateZ] = useState(false);
+  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
+  const [currentGeography, setCurrentGeography] = useState('County');
+  const [currentDataset, setCurrentDataset] = useState('1point3acres');
 
   const VariablePresets = {
     "HEADER:cases":{},
@@ -460,7 +459,132 @@ const VariablePanel = (props) => {
       fixedScale: 'forecasting',
       scale3D: 50000
     },
+    "HEADER:mobility":{},
+    "Incoming Mobility": {
+      variableName:"Incoming Mobility",
+      numerator: 'county_LEX_in',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      scale3D: 10000000
+    },
+    "Outgoing Mobility": {
+      variableName:"Outgoing Mobility",
+      numerator: 'county_LEX_out',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      scale3D: 10000000
+    },
+    "Incoming Mobility Normalized": {
+      variableName:"Incoming Mobility Normalized",
+      numerator: 'county_LEX_in',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 10000000
+    },
+    "Outgoing Mobility Normalized": {
+      variableName:"Outgoing Mobility Normalized",
+      numerator: 'county_LEX_out',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 10000000
+    },
   }
+  
+  const datasetTree = {
+    'County': {
+      '1point3acres':'county_1p3a.geojson',
+      'New York Times':'county_nyt.geojson',
+      'USA Facts':'county_usfacts.geojson',
+      'CDC':'cdc.geojson',
+      // 'Yu Group at Berkeley':'county_usfacts.geojson',
+      'County Health Rankings':'county_usfacts.geojson',
+      'COVID Exposure Indices':'county_usfacts.geojson',
+    }, 
+    'State': {
+      '1point3acres':'state_1p3a.geojson',
+      'New York Times':'state_nyt.geojson',
+      'CDC':'state_1p3a.geojson',
+      'County Health Rankings':'state_1p3a.geojson',
+    }
+  }
+
+  const urlParamsTree = {
+    'county_usfacts.geojson': {
+      name: 'USA Facts',
+      geography: 'County'
+    },
+    'county_1p3a.geojson': {
+      name: '1point3acres',
+      geography: 'County'
+    },
+    'county_nyt.geojson': {
+      name: 'New York Times',
+      geography: 'County'
+    },
+    'state_1p3a.geojson': {
+      name: '1point3acres',
+      geography: 'State'
+    },
+    'state_usafacts.geojson': {
+      name: 'USA Facts',
+      geography: 'State'
+    }, 
+    'state_nyt.geojson': {
+      name: 'New York Times',
+      geography: 'State'
+    },
+    'global_jhu.geojson': {
+      name: 'John Hopkins University',
+      geography: 'Global'
+    },
+    'cdc.geojson': {
+      name: 'CDC',
+      geography: 'County'
+    }
+  }
+
+  const allGeographies = ['County', 'State']
+  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'County Health Rankings', "COVID Exposure Indices"] //'Yu Group at Berkeley', 
+
+  useEffect(() => {
+    if (newVariable !== dataParams.variableName) {
+      setNewVariable(dataParams.variableName)
+      setCurrentGeography(urlParamsTree[currentData]['geography'])
+      if (dataParams.variableName.indexOf('Vaccin') !== -1 || (dataParams.variableName.indexOf('Test') !== -1 && currentData.indexOf('state') === -1)) {
+        setCurrentDataset('CDC')
+      } else {
+        setCurrentDataset(urlParamsTree[currentData]['name'])
+      }
+    }
+  }, [urlParams])
 
   // mobility variable overlays
 
@@ -662,80 +786,7 @@ const VariablePanel = (props) => {
     if (mapParams.vizType !== vizType) {
       dispatch(setMapParams({vizType}))
     }
-  }
-
-  // const handleZSwitch = () => {
-  //   setBivariateZ(prev => !prev )
-  // }
-  
-  const datasetTree = {
-    'County': {
-      '1point3acres':'county_1p3a.geojson',
-      'New York Times':'county_nyt.geojson',
-      'USA Facts':'county_usfacts.geojson',
-      'CDC':'cdc.geojson',
-      'Yu Group at Berkeley':'county_usfacts.geojson',
-      'County Health Rankings':'county_usfacts.geojson',
-    }, 
-    'State': {
-      '1point3acres':'state_1p3a.geojson',
-      'New York Times':'state_nyt.geojson',
-      'CDC':'state_1p3a.geojson',
-      'County Health Rankings':'state_1p3a.geojson',
-    }
-  }
-
-  const urlParamsTree = {
-    'county_usfacts.geojson': {
-      name: 'USA Facts',
-      geography: 'County'
-    },
-    'county_1p3a.geojson': {
-      name: '1point3acres',
-      geography: 'County'
-    },
-    'county_nyt.geojson': {
-      name: 'New York Times',
-      geography: 'County'
-    },
-    'state_1p3a.geojson': {
-      name: '1point3acres',
-      geography: 'State'
-    },
-    'state_usafacts.geojson': {
-      name: 'USA Facts',
-      geography: 'State'
-    }, 
-    'state_nyt.geojson': {
-      name: 'New York Times',
-      geography: 'State'
-    },
-    'global_jhu.geojson': {
-      name: 'John Hopkins University',
-      geography: 'Global'
-    },
-    'cdc.geojson': {
-      name: 'CDC',
-      geography: 'County'
-    }
-  }
-
-  const [newVariable, setNewVariable] = useState("Confirmed Count per 100K Population");
-  const [currentGeography, setCurrentGeography] = useState('County');
-  const [currentDataset, setCurrentDataset] = useState('1point3acres');
-
-  useEffect(() => {
-    if (newVariable !== dataParams.variableName) {
-      setNewVariable(dataParams.variableName)
-      setCurrentGeography(urlParamsTree[currentData]['geography'])
-      if (dataParams.variableName.indexOf('Vaccin') !== -1 || (dataParams.variableName.indexOf('Test') !== -1 && currentData.indexOf('state') === -1)) {
-        setCurrentDataset('CDC')
-      } else {
-        setCurrentDataset(urlParamsTree[currentData]['name'])
-      }
-    }
-  }, [urlParams])
-  
+  }  
 
   const handleNewVariable = (e) => {
     let tempGeography = currentGeography;
@@ -831,9 +882,6 @@ const VariablePanel = (props) => {
         dispatch(setMapParams({binMode:'dynamic'}))
     }
   }
-
-  const allGeographies = ['County', 'State']
-  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'County Health Rankings'] //'Yu Group at Berkeley', 
 
   return (
     <VariablePanelContainer className={panelState.variables ? '' : 'hidden'} otherPanels={panelState.info} id="variablePanel">

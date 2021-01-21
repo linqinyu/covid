@@ -37,7 +37,6 @@ import { colorScales, fixedScales, dataPresets, variablePresets, colors } from '
 
 
 function App() {
-
   const dateLists = useMemo(() => getDateLists())
   // static variables for floating panel sizing
   let [ 
@@ -114,7 +113,7 @@ function App() {
         accumulate.includes(csv),
         dateLists[dateList[csv]]
       ).then(result => {return result}))
-
+        
     Promise.all([
       loadJson(`${process.env.PUBLIC_URL}/geojson/${geojson}`, gda_proxy).then(result => {return result}),
       ...csvPromises

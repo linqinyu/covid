@@ -358,7 +358,7 @@ const Map = () => {
     
     const GetFillColor = (f, bins, mapType) => {
         if ((!bins.hasOwnProperty("bins")) || (!f.hasOwnProperty(dataParams.numerator))) {
-            return [240,240,240,120]
+            return [240,240,240,0]
         } else if (mapType === 'lisa') {
             return colorScales.lisa[currLisaData[storedGeojson[currentData]['geoidOrder'][f.properties.GEOID]]]
         } else {
