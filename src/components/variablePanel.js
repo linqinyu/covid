@@ -516,6 +516,34 @@ const VariablePanel = (props) => {
       scale:100000,
       scale3D: 10000000
     },
+    "POI Visits": {
+      variableName:"POI Visits",
+      numerator: 'county_POI_visits',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      scale3D: 10000000
+    },
+    "POI Visits Normalized": {
+      variableName:"POI Visits Normalized",
+      numerator: 'county_POI_visits',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 10000000
+    },
   }
   
   const datasetTree = {
@@ -527,6 +555,7 @@ const VariablePanel = (props) => {
       // 'Yu Group at Berkeley':'county_usfacts.geojson',
       'County Health Rankings':'county_usfacts.geojson',
       'COVID Exposure Indices':'county_usfacts.geojson',
+      'Safegraph':'county_usfacts.geojson',
     }, 
     'State': {
       '1point3acres':'state_1p3a.geojson',
@@ -572,7 +601,7 @@ const VariablePanel = (props) => {
   }
 
   const allGeographies = ['County', 'State']
-  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'County Health Rankings', "COVID Exposure Indices"] //'Yu Group at Berkeley', 
+  const allDatasets = ['1point3acres', 'USA Facts', 'New York Times', 'CDC', 'County Health Rankings', "COVID Exposure Indices", 'Safegraph'] //'Yu Group at Berkeley', 
 
   useEffect(() => {
     if (newVariable !== dataParams.variableName) {

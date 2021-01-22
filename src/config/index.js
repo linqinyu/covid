@@ -132,6 +132,10 @@ export const colors = {
     lightgray: '#d8d8d8',
     yellow: '#FFCE00',
     lightblue: '#A1E1E3',
+    skyblue: '#c1ebeb',
+    blue: '#007bff',
+    teal: '#00575c',
+    orange: '#f37e43',
     pairedColors: {
         count: [
             '#1f78b4',
@@ -180,8 +184,9 @@ export const dataPresets = {
             'chr_health_factors',
             'county_LEX_out',
             'county_LEX_in',
+            'county_POI_visits'
         ], 
-        joinCols: ['GEOID', ['FIPS','fips','countyFIPS','GEOID']], 
+        joinCols: ['GEOID', ['FIPS','fips','countyFIPS','GEOID','county']], 
         tableNames: [
             'cases',
             'deaths', 
@@ -189,14 +194,16 @@ export const dataPresets = {
             'chr_life', 
             'chr_health_factors',
             'county_LEX_out',
-            'county_LEX_in'
+            'county_LEX_in',
+            'county_POI_visits'
         ],
-        accumulate: ['county_LEX_out','county_LEX_in'],
+        accumulate: ['county_LEX_out','county_LEX_in','county_POI_visits'],
         dateList: {
             'covid_confirmed_usafacts': 'usDateList', 
             'covid_deaths_usafacts': 'usDateList',
             'county_LEX_out': 'isoDateList',
-            'county_LEX_in': 'isoDateList'
+            'county_LEX_in': 'isoDateList',
+            'county_POI_visits': 'isoDateList',
         }
     },
     'county_1p3a.geojson': {
@@ -555,6 +562,34 @@ export const variablePresets = {
     "Outgoing Mobility Normalized": {
       variableName:"Outgoing Mobility Normalized",
       numerator: 'county_LEX_out',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: 'characteristic',
+      dProperty: 'population',
+      dRange:null,
+      dIndex:null,
+      scale:100000,
+      scale3D: 10000000
+    },
+    "POI Visits": {
+      variableName:"POI Visits",
+      numerator: 'county_POI_visits',
+      nType: 'time-series',
+      nProperty: null,
+      nRange: 1,
+      denominator: 'properties',
+      dType: null,
+      dProperty: null,
+      dRange:null,
+      dIndex:null,
+      scale:1,
+      scale3D: 10000000
+    },
+    "POI Visits Normalized": {
+      variableName:"POI Visits Normalized",
+      numerator: 'county_POI_visits',
       nType: 'time-series',
       nProperty: null,
       nRange: 1,

@@ -1,5 +1,11 @@
+* {
+  box-sizing:border-box;
+  padding:0;
+  margin:0;
+}
+
 body {
-  background:rgb(20,20,20);
+  background:rgb(15,15,15);
   font-family: 'Lato', sans-serif;
 }
 
@@ -38,7 +44,7 @@ body {
     font-family: Lato, sans-serif !important;
     font-size: 13px;
     /* background-color: #111333; */
-    overflow: hidden;
+    overflow-x: hidden;
   } 
   
 #mainContainer { 

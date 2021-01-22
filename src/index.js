@@ -5,7 +5,6 @@ import { createStore} from 'redux';
 import reducer from './reducers';
 import { Provider } from 'react-redux';
 import './index.css';
-import './mapbox.css';
 import WebFont from 'webfontloader';
 import registerServiceWorker from "./registerServiceWorker";
 
