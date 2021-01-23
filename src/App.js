@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
  
 import { About, Api, Data, Contact, Insights, Home, Map, Methodology, Time, Choropleth, Hotspots, Trends, Faq } from './components/';
  
