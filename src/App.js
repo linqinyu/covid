@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
  
 import { About, Api, Data, Contact, Insights, Home, Map, Methodology, Time, Choropleth, Hotspots, Trends, Faq } from './components/';
  
@@ -7,7 +7,7 @@ class App extends Component {
 
   render() {
     return (     
-       <BrowserRouter>
+       <Router basename={process.env.PUBLIC_URL}>
         <div>
             <Switch>
              <Route path="/" component={Home} exact/>
@@ -37,7 +37,7 @@ class App extends Component {
             <Route />
            </Switch>
         </div> 
-      </BrowserRouter>
+      </Router>
     );
   }
 }
