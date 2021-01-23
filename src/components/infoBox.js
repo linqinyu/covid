@@ -13,7 +13,7 @@ import { StyledDropDown } from '../styled_components';
 const InfoContainer = styled.div`
     background: ${colors.gray};
     color: ${colors.white};
-    padding: 0;
+    padding: 20px;
     overflow: hidden;
     display: ${props => props.active ? 'initial' : 'none'};
     border-radius: 4px;
@@ -46,8 +46,8 @@ const InfoContainer = styled.div`
 
 const Drawer = styled.div`
     position:absolute;
-    left:5px;
-    top:25px;
+    left:20px;
+    top:30px;
     max-width:120px;
     @media(max-width:1024px) {
         width:100%;

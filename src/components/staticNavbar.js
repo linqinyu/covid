@@ -133,11 +133,13 @@ const StaticNavbar = () => {
     return (
        <Navbar>
             <NavbarContent>
-                <img 
-                    src={`${process.env.PUBLIC_URL}/img/us-covid-atlas-cluster-logo.svg`}
-                    alt="US Covid Atlas Logo"
-                    className="logo"
-                />
+                <NavLink to="/">
+                    <img 
+                        src={`${process.env.PUBLIC_URL}/img/us-covid-atlas-cluster-logo.svg`}
+                        alt="US Covid Atlas Logo"
+                        className="logo"
+                    />
+                </NavLink>
                 <nav className="mainNav">
                     <ul>
                         <li>     

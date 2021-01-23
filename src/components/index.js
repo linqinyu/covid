@@ -1,17 +1,14 @@
-import About from './About';
+
 import BottomPanel from './bottomPanel';
-import Contact from './Contact';
 import DataPanel from './dataPanel';
 import DateSlider from './slider';
 import Dock from './dock';
 import Draggable from './draggable';
 import Footer from './Footer';
-import Home from './Home';
 import InfoBox from './infoBox';
 import Legend from './legend';
 import MainLineChart from './mainLineChart';
 import MapSection from './mapSection';
-import Map from './Map';
 import MapTooltipContent from './mapTooltipContent';
 import NavBar from './navbar';
 import NotificationBox from './notificationBox';
@@ -23,20 +20,30 @@ import StaticNavbar from './staticNavbar';
 import Tooltip from './tooltip';
 import TopPanel from './topPanel';
 
+import About from './Pages/About';
+import Api from './Pages/Api';
+import Contact from './Pages/Contact';
+import Choropleth from './Pages/Choropleth';
+import Data from './Pages/Data';
+import Faq from './Pages/Faq';
+import Home from './Pages/Home';
+import Hotspots from './Pages/Hotspots';
+import Insights from './Pages/Insights';
+import Map from './Pages/Map';
+import Methodology from './Pages/Methodology';
+import Time from './Pages/Time';
+import Trends from './Pages/Trends';
+
 export {
-    About,
     BottomPanel,
-    Contact,
     DataPanel,
     DateSlider,
     Dock,
     Draggable,
     Footer,
-    Home,
     InfoBox,
     Legend,
     MainLineChart,
-    Map,
     MapSection,
     MapTooltipContent,
     NavBar,
@@ -47,5 +54,19 @@ export {
     Scaleable,
     StaticNavbar,
     Tooltip, 
-    TopPanel
+    TopPanel,
+
+    About,
+    Api,
+    Contact,
+    Choropleth,
+    Data,
+    Faq,
+    Home,
+    Hotspots,
+    Insights,
+    Map,
+    Methodology,
+    Time,
+    Trends
 }

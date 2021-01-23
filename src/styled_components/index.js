@@ -145,7 +145,7 @@ export const ContentContainer = styled.div`
     font-weight: 300;
     font-style: italic;
   }
-  p, a {
+  p, a, ul li, ol li {
     font-family: 'Lato', sans-serif;
     font-size: 16px;
     font-weight: 400;
@@ -153,6 +153,9 @@ export const ContentContainer = styled.div`
     font-style: normal;
     line-height: 1.63;
     letter-spacing: normal;
+  }
+  ul, ol {
+    padding-left:20px;
   }
   a {
     font-weight:bold;

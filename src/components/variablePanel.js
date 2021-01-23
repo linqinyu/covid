@@ -20,7 +20,7 @@ import styled from 'styled-components';
 // utils and helper components
 import { colLookup } from '../utils'; //getGzipData, getArrayCSV
 import Tooltip from './tooltip';
-import { StyledDropDown, BinsContainer } from '../styled_components';
+import { StyledDropDown, BinsContainer, Gutter } from '../styled_components';
 import { setVariableParams, setMapParams, setCurrentData, setPanelState, setParametersAndData } from '../actions'; //variableChangeZ, setNotification, storeMobilityData
 import { fixedScales, colorScales, colors } from '../config';
 import { settings } from '../config/svg';
@@ -916,6 +916,7 @@ const VariablePanel = (props) => {
     <VariablePanelContainer className={panelState.variables ? '' : 'hidden'} otherPanels={panelState.info} id="variablePanel">
       <ControlsContainer>
         <h2>Data Sources &amp;<br/> Map Variables</h2>
+        <Gutter h={20}/>
         <StyledDropDown id="newVariableSelect">
           <InputLabel htmlFor="newVariableSelect">Variable</InputLabel>
           <Select
@@ -1107,6 +1108,7 @@ const VariablePanel = (props) => {
           </RadioGroup>
         </StyledDropDown>
         <p>Visualization Type</p>
+        <Gutter h={10}/>
         <StyledButtonGroup color="primary" aria-label="text button group" id="visualizationType">
           <Button className={mapParams.vizType === '2D' ? 'active' : ''} data-val="2D" key="2D-btn" onClick={() => handleVizTypeButton('2D')}>2D</Button>
           <Button className={mapParams.vizType === '3D' ? 'active' : ''} data-val="3D" key="3D-btn" onClick={() => handleVizTypeButton('3D')}>3D</Button>
@@ -1218,17 +1220,21 @@ const VariablePanel = (props) => {
       </ControlsContainer>
       <div className="noteContainer">
         <h3>Help us improve the Atlas!</h3>
+        <Gutter h={10}/>
         <p>
           <a href="https://docs.google.com/forms/d/e/1FAIpQLSf0KdYeVyvwnz0RLnZijY3kdyFe1SwXukPc--a1HFPE1NRxyw/viewform?usp=sf_link" target="_blank" rel="noopener noreferrer">Take the Atlas v2 survey here </a>
           or share your thoughts at <a href="mailto:contact@theuscovidatlas.org" target="_blank" rel="noopener noreferrer">contact@theuscovidatlas.org.</a>
         </p>
-        <hr></hr>
+        <Gutter h={10}/>
+        <hr />
+        <Gutter h={10}/>
         <p className="note">
           Data is updated with freshest available data at 3pm CST daily, at minimum. 
           In case of data discrepancy, local health departments are considered most accurate as per CDC recommendations. 
-          More information on <a href="data.html">data</a>, <a href="methods.html">methods</a>, 
-          and <a href="FAQ.html">FAQ</a> at main site.
+          More information on <a href="/data">data</a>, <a href="/methods">methods</a>, 
+          and <a href="/faq">FAQ</a> at main site.
         </p>
+        <Gutter h={10}/>
         <div className="poweredByGeoda">
             <a href="https://geodacenter.github.io" target="_blank" rel="noopener noreferrer">
               <img src={`${process.env.PUBLIC_URL}/assets/img/geoda-logo.png`} alt="Geoda Logo"/>
